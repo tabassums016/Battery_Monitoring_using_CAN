@@ -72,6 +72,9 @@ uint32_t adc1 = 0;
 uint32_t adc2 = 0;
 uint32_t adc3 = 0;
 float voltage = 0;
+float R1 = 2.7;
+float R2 = 10;
+float conversion_factor = 0;
 
 void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan) {
 	HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO1, &RxHeader, RxData);
@@ -128,6 +131,7 @@ int main(void) {
 	memset(Bat2, 0, sizeof(Bat1));
 	memset(Bat3, 0, sizeof(Bat1));
 
+	conversion_factor= (R1 + R2) / R2; //To convert 3.3V level data to 4.2V level
 	HAL_CAN_Start(&hcan);
 	// Configure the filter
 	sFilterConfig.FilterActivation = CAN_FILTER_ENABLE;
@@ -151,13 +155,13 @@ int main(void) {
 		/* USER CODE BEGIN 3 */
 
 		voltage = 3.3 * (float) adc1 / 4095;
-		sprintf(Bat1, "V1 = %0.2fV", voltage);
+		sprintf(Bat1, "V1 = %0.2fV", voltage * conversion_factor);
 
 		voltage = 3.3 * (float) adc2 / 4095;
-		sprintf(Bat2, "V2 = %0.2fV", voltage);
+		sprintf(Bat2, "V2 = %0.2fV", voltage * conversion_factor);
 
 		voltage = 3.3 * (float) adc3 / 4095;
-		sprintf(Bat3, "V2 = %0.2fV", voltage);
+		sprintf(Bat3, "V2 = %0.2fV", voltage * conversion_factor);
 
 		SSD1306_Clear();
 		SSD1306_GotoXY(1, 0);
